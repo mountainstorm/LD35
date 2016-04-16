@@ -25,10 +25,11 @@ var ROTATE_SPEED = 400
 var ACCELERATOR_SPEED = 800
 var REACTION_SPEED = ACCELERATOR_SPEED
 var ELEMENT_REFRESH = 1000
-var SCORE_RATE = 500
+var SCORE_RATE = 2000
 var BOUNCE_DECAY = 0.8
-var HEAT_GROW = 10
-var HEAT_SHRINK = 5
+var REACTION_WINDOW = (1000 / SCORE_RATE) * 10
+var ENDGAME = 6000 // long enough for all decays to have completed
+var ENDGAME_WAIT = 6000
 
 
 var playState = function() {}
@@ -55,46 +56,13 @@ playState.prototype = {
         self.scoreBonus = 0
         self._lastScore = 0
         self._displayScore = 0
+        self.reactions = 0
+        self._lastReactions = 0
         self.heat = 0
+        self._currentHeat = 0
 
-        self.chainReactions = 0
-        // bonuses are # of chain reactions total so far
-        self.chainReactionBonus = [
-            { target: 4, score: 4000, title: 'Unplanned Reaction +4000' },
-            { target: 10, score: 4000, title: 'Chain Reactor +4000' },
-            { target: 20, score: 4000, title: 'Unstoppable Reactor +4000' }
-        ]
-        // energy bonus are score (excluding bonus) in a SCORE_RATE window
-        // keep these in high to low format as we stop when we find a match
-        self.energyBonus = [
-            { target: 1600, score: '1600', title: 'Super Giant +1600' },
-            { target: 1400, score: '1400', title: 'Blue Giant +1400' },
-            { target: 1200, score: '1200', title: 'Red Giant +1200' },
-            { target: 800, score: '800', title: 'Yellow Dwarf +800' },
-            { target: 600, score: '600', title: 'Atomic +600' },
-        ]
-        self.combinations = {
-            'element1-0+element1-0': { score: 200, elements: ['element1-1', 'element-v', 'element-p'] },
-            'element1-1+element1-0': { score: 200, elements: ['element2-1', 'element-y'] },
-            'element2-1+element2-2': { score: 200, elements: ['element4-3', 'element-y'] },
-            'element4-3+element1-0': { score: 1000, elements: ['element5-3', 'element-y'] },
-            'element2-1+element2-1': { score: 200, elements: ['element1-0', 'element1-0', 'element2-2'] },
-            'element3-4+element1-0': { score: 200, elements: ['element2-2', 'element2-2'] },
-        }
-        self.elementsInfo = {
-            'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50, budget: 50 },
-            'element1-1': { speed: { min: 8, max: 18 } },
-            'element2-1': { speed: { min: 6, max: 16 } },
-            'element2-2': { speed: { min: 4, max: 14 } },
-            'element4-3': { speed: { min: 2, max: 12 }, decay: { min: 3000, max: 5000, score: 200, elements: ['element3-4', 'element-v'] } },
-            'element3-4': { speed: { min: 2, max: 12 } },
-            'element4-4': { speed: { min: 1, max: 10 }, selectable: false, decay: { min: 3000, max: 5000, score: 200, elements: ['element2-2', 'element2-2'] } },
-            'element5-3': { speed: { min: 0, max: 8 }, selectable: false, decay: { min: 2000, max: 3000, score: 200, elements: ['element4-4', 'element-v', 'element-p'] } },
-
-            'element-p': { speed: { min: 2000, max: 2200 }, hip: true, selectable: false },
-            'element-y': { speed: { min: 1800, max: 2000 }, hip: true, selectable: false },
-            'element-v': { speed: { min: 1450, max: 1500 }, hip: true, selectable: false }
-        }
+        self.showingBonus = false
+        self.bonusDisplayQueue = []
 
         self.bgGradient = [
 '#250918',
@@ -161,7 +129,54 @@ playState.prototype = {
 '#F7F8E3',
 '#FAFBE9',
 '#FDFFF0',
+        ]        
+
+        self.chainReactions = 0
+        // bonuses are # of chain reactions total so far
+        self.chainReactionBonus = [
+            { target: 4, score: 4000, title: 'Unplanned Reaction +4000' },
+            { target: 10, score: 4000, title: 'Chain Reactor +4000' },
+            { target: 20, score: 4000, title: 'Unstoppable Reactor +4000' }
         ]
+        // energy bonus are score (excluding bonus) in a SCORE_RATE window
+        // keep these in high to low format as we stop when we find a match
+        self.energyBonus = [
+            { target: 3200, score: 1600, title: 'Super Giant +1600' },
+            { target: 2800, score: 1400, title: 'Blue Giant +1400' },
+            { target: 2400, score: 1200, title: 'Red Giant +1200' },
+            { target: 1600, score: 800, title: 'Yellow Dwarf +800' },
+            { target: 1200, score: 600, title: 'Atomic +600' },
+        ]
+        // reaction bonus is awarded if the last REACTION_WINDOW readings above these levels
+        // must be high to low as we stop of first match
+        self.reactionHistory = []
+        self.reactionBonus = [
+            { target: 6, score: 1600, title: 'Roasting +1600' },
+            { target: 4, score: 1400, title: 'Toasty +1400' },
+            { target: 3, score: 1200, title: 'Warm +1200' },
+        ]
+        self.combinations = {
+            'element1-0+element1-0': { score: 200, elements: ['element1-1', 'element-v', 'element-p'] },
+            'element1-1+element1-0': { score: 200, elements: ['element2-1', 'element-y'] },
+            'element2-1+element2-2': { score: 200, elements: ['element4-3', 'element-y'] },
+            'element4-3+element1-0': { score: 1000, elements: ['element5-3', 'element-y'] },
+            'element2-1+element2-1': { score: 200, elements: ['element1-0', 'element1-0', 'element2-2'] },
+            'element3-4+element1-0': { score: 200, elements: ['element2-2', 'element2-2'] },
+        }
+        self.elementsInfo = {
+            'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50, budget: 100 },
+            'element1-1': { speed: { min: 8, max: 18 } },
+            'element2-1': { speed: { min: 6, max: 16 } },
+            'element2-2': { speed: { min: 4, max: 14 } },
+            'element4-3': { speed: { min: 2, max: 12 }, decay: { min: 3000, max: 5000, score: 200, elements: ['element3-4', 'element-v'] } },
+            'element3-4': { speed: { min: 2, max: 12 } },
+            'element4-4': { speed: { min: 1, max: 10 }, selectable: false, decay: { min: 3000, max: 5000, score: 200, elements: ['element2-2', 'element2-2'] } },
+            'element5-3': { speed: { min: 0, max: 8 }, selectable: false, decay: { min: 2000, max: 3000, score: 200, elements: ['element4-4', 'element-v', 'element-p'] } },
+
+            'element-p': { speed: { min: 2000, max: 2200 }, hip: true, selectable: false },
+            'element-y': { speed: { min: 1800, max: 2000 }, hip: true, selectable: false },
+            'element-v': { speed: { min: 1450, max: 1500 }, hip: true, selectable: false }
+        }
     },
 
     create: function() {
@@ -176,8 +191,8 @@ playState.prototype = {
                 for (var i = 0; i < elementInfo.initialCount; i++) {
                     self.addElement(elementType)
                 }
-                self.remainingResource += elementInfo.budget
                 elementInfo.budget -= elementInfo.initialCount
+                self.remainingResource += elementInfo.budget
             }
         })
 
@@ -196,25 +211,40 @@ playState.prototype = {
                     if (elementInfo.budget > 0) {
                         self.addElement(elementType)
                         self.remainingResource--
+                        elementInfo.budget--
                         self.hudResources.text = 'Resources: ' + self.remainingResource
                     }
                 }
             })
         })
 
-        // score rate (background color)
+        // score rate (background color, periodic bonuses)
         PHASER.time.events.loop(SCORE_RATE, function () {
-            if ((self.score - self._lastScore) > 0) {
-                if (self.heat < self.bgGradient.length * HEAT_GROW) {
-                    self.heat += HEAT_GROW
-                }
-            } else {
-                if (self.heat > 0) {
-                    self.heat -= HEAT_SHRINK
-                }
-            }
-            PHASER.stage.backgroundColor = self.bgGradient[Math.round(self.heat / 10)]
             var ds = self.score - self._lastScore
+            var dr = self.reactions - self._lastReactions
+
+            self.reactionHistory.push(dr)
+            if (self.reactionHistory.length > REACTION_WINDOW) {
+                self.reactionHistory.shift()
+            }
+            var avg = 0
+            var total = 0.0
+            $.each(self.reactionHistory, function (i) {
+                total += self.reactionHistory[i]
+            })
+            avg = total / self.reactionHistory.length
+            if (self.reactionHistory.length == REACTION_WINDOW) {
+                $.each(self.reactionBonus, function (i) {
+                    var bonus = self.reactionBonus[i]
+                    if (avg > bonus.target) {
+                        self.scoreBonus += bonus.score
+                        self.showBonus(bonus.title)
+                        return false
+                    }
+                })
+            }
+            self.heat = avg
+
             $.each(self.energyBonus, function (i) {
                 var bonus = self.energyBonus[i]
                 if (ds >= bonus.target) {
@@ -224,6 +254,45 @@ playState.prototype = {
                 }
             })
             self._lastScore = self.score
+            self._lastReactions = self.reactions
+        })
+
+
+        PHASER.time.events.loop(ENDGAME, function () {
+            // check for endgame
+            if (self.bonusDisplayQueue.length == 0 &&
+                self._displayScore == self.score + self.scoreBonus &&
+                self.remainingResource == 0) {
+                // we're done - if all reactions are done
+                // we've eaited long enough that there no decay happening
+                var nodice = false
+                self.atoms.forEach(function (a) {
+                    self.atoms.forEach(function (b) {
+                        if (a != b) {
+                            // ignore self on self checks
+                            if (self.allowedCombination(a, b)) {
+                                nodice = true
+                            }
+                        }
+                    })
+                })
+                if (nodice == false) {
+                    // we're done!
+                    var text = PHASER.add.text(
+                        PHASER.world.centerX, PHASER.world.centerY,
+                        'GAME OVER',
+                        { font: '64px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+                    )
+                    text.alpha = 0
+                    text.anchor.setTo(0.5, 0.5)
+                    var e = PHASER.add.tween(text).to({ alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false)
+                    e.onComplete.add(function () {
+                        PHASER.time.events.add(ENDGAME_WAIT, function () {
+                            PHASER.state.start('Credits')
+                        })
+                    })
+                }
+            }
         })
 
         self.hudScore = PHASER.add.text(
@@ -260,9 +329,32 @@ playState.prototype = {
         })
 
         if (self.score + self.scoreBonus > self._displayScore) {
-            self._displayScore += 10
+            var ds = self.score + self.scoreBonus - self._displayScore
+            if (ds < 100) {
+                self._displayScore = self.score + self.scoreBonus
+            } else if (ds <= 0) {
+                // do nothing yet
+            } else {
+                self._displayScore += Math.floor(ds / 10)
+            }
         }
         self.hudScore.text = 'Score: ' + self._displayScore
+
+        if (self.heat > self._currentHeat) {
+            self._currentHeat += 0.01
+        } else if (self.heat < self._currentHeat) {
+            self._currentHeat -= 0.01
+            if (self._currentHeat < 0.0) {
+                self._currentHeat = 0.0
+            }
+        }
+        var g = 6.0 / (self.bgGradient.length - 1.0)
+        var h = Math.round(self._currentHeat / g)
+        if (h >= self.bgGradient.length) {
+            h = self.bgGradient.length - 1
+        }
+        PHASER.stage.backgroundColor = self.bgGradient[h]
+        self.displayBonus()
     },
 
     render: function() {
@@ -333,6 +425,7 @@ playState.prototype = {
                     $.each(elementTypes, function (i) {
                         self.addElement(elementTypes[i], sprite.world.x, sprite.world.y)
                     })
+                    self.reactions++
                 }
             })
         }
@@ -402,6 +495,7 @@ playState.prototype = {
             self.atoms.remove(a)
             self.atoms.remove(b)
             self.fuseElements(a, b)
+            self.reactions++
         }
     },
 
@@ -461,17 +555,32 @@ playState.prototype = {
     },
 
     showBonus: function (title) {
-        var text = PHASER.add.text(
-            PHASER.world.centerX, PHASER.world.centerY,
-            title,
-            { font: '64px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
-        )
-        text.alpha = 0
-        text.anchor.setTo(0.5, 0.5)
-        var t = PHASER.add.tween(text).to({ alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false)
-        t.onComplete.add(function () {
-            PHASER.add.tween(text).to({ alpha: 0 }, 800, Phaser.Easing.Linear.None, true, 1000, 0, false)
-        })
+        var self = this
+        console.log(title)
+        self.bonusDisplayQueue.push(title)
+    },
+
+    displayBonus: function () {
+        var self = this
+        if (self.bonusDisplayQueue.length > 0 && self.showingBonus == false) {
+            self.showingBonus = true
+            title = self.bonusDisplayQueue.shift()
+            var text = PHASER.add.text(
+                PHASER.world.centerX, PHASER.world.centerY,
+                title,
+                { font: '64px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+            )
+            text.alpha = 0
+            text.anchor.setTo(0.5, 0.5)
+            var e = PHASER.add.tween(text).to({ alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false)
+            e.onComplete.add(function () {
+                var l = PHASER.add.tween(text).to({ alpha: 0 }, 800, Phaser.Easing.Linear.None, true, 1000, 0, false)
+                l.onComplete.add(function () {
+                    self.showingBonus = false
+                })
+
+            })            
+        }
     }
 }
 

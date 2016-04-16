@@ -12,4 +12,5 @@ Diary
 13:10: Basic gameplay working, need to figure out scoring
 14:19: Decaying and config of most things working ... how do you 'win'
 17:11: Scoring working and lots of tweaks, giving chain reactions.  It's starting to feel like a game
-18:11: It's a game!
+18:11: It's a game!  but its got a memory leak
+19:18: Im happy with the general gameplay, although I now need to fix the bugs
