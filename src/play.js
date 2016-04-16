@@ -22,6 +22,7 @@
 
 
 var ACCELERATOR_SPEED = 800
+var REACTION_SPEED = ACCELERATOR_SPEED
 
 
 var playState = function() {}
@@ -46,12 +47,12 @@ playState.prototype = {
 
         // mapping table
         self.combinations = {
-            'element1-0+element1-0': ['element1-1', 'element-v', 'element-p'],
-            'element1-1+element1-0': ['element2-1', 'element-y'],
-            'element2-1+element2-2': ['element4-3', 'element-y'],
-            'element4-3+element1-0': ['element5-3', 'element-y'],
-            'element2-1+element2-1': ['element1-0', 'element1-0', 'element2-2'],
-            'element3-4+element1-0': ['element2-2', 'element2-2'],
+            'element1-0+element1-0': { score: 2, elements: ['element1-1', 'element-v', 'element-p'] },
+            'element1-1+element1-0': { score: 2, elements: ['element2-1', 'element-y'] },
+            'element2-1+element2-2': { score: 2, elements: ['element4-3', 'element-y'] },
+            'element4-3+element1-0': { score: 10, elements: ['element5-3', 'element-y'] },
+            'element2-1+element2-1': { score: 2, elements: ['element1-0', 'element1-0', 'element2-2'] },
+            'element3-4+element1-0': { score: 2, elements: ['element2-2', 'element2-2'] },
         }
         self.elementsInfo = {
             'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50 },
@@ -163,7 +164,6 @@ playState.prototype = {
                     self.atoms.remove(sprite)
                     var elementTypes = elementInfo.decay.elements
                     $.each(elementTypes, function (i) {
-                        console.log('decaying into', elementTypes[i])
                         self.addElement(elementTypes[i], sprite.world.x, sprite.world.y)
                     })
                 }
@@ -226,18 +226,19 @@ playState.prototype = {
             return true
         })
 
-        if (aa != undefined && bb != undefined) {
+        // XXX: shforce chain reaction - note tweak the reaction speed
+        if (true) { //aa != undefined && bb != undefined) {
             // they hit each other!
             var cp = a.body.speed + b.body.speed
             //console.log(a, 'hit', b, 'closing speed: ' + cp)
             // 1.5 to account for rounding errors
-            if (cp >= ACCELERATOR_SPEED * 1.5 && self.allowedCombination(a, b)) {
+            if (cp >= REACTION_SPEED && self.allowedCombination(a, b)) {
                 // remove the sprites and replace with the combined
-                aa.dontDecay = true
-                bb.dontDecay = true
-                self.atoms.remove(aa)
-                self.atoms.remove(bb)
-                self.fuseElements(aa, bb)
+                a.dontDecay = true
+                b.dontDecay = true
+                self.atoms.remove(a)
+                self.atoms.remove(b)
+                self.fuseElements(a, b)
             }
         }
     },
@@ -248,7 +249,9 @@ playState.prototype = {
         var x = a.world.x + ((a.world.x - b.world.x) / 2)
         var y = a.world.y + ((a.world.y - b.world.y) / 2)
         
-        var elementTypes = self.getNewElementTypes(a, b)
+        var fusionResult = self.getFusionResult(a, b)
+        self.score += fusionResult.score
+        var elementTypes = fusionResult.elements
         $.each(elementTypes, function (i) {
             self.addElement(elementTypes[i], x, y)
         })
@@ -264,7 +267,7 @@ playState.prototype = {
         return retval
     },
 
-    getNewElementTypes: function (a, b) {
+    getFusionResult: function (a, b) {
         var self = this
         var retval = null
         if (a.elementType + '+' + b.elementType in self.combinations) {

@@ -10,6 +10,7 @@ LD35 Entry
 
 * Decide if we stick with particles or go with shapes
 * Time bonus - new hydrogen attoms arrive if you do it quickly
+* Bug when selected item disapears
 
 
 ## Keywords ##
