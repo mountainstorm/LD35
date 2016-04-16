@@ -21,9 +21,14 @@
 */
 
 
-var ROTATTE_SPEED = 600
+var ROTATE_SPEED = 600
 var ACCELERATOR_SPEED = 800
 var REACTION_SPEED = ACCELERATOR_SPEED
+var ELEMENT_REFRESH = 1000
+var SCORE_RATE = 500
+var BOUNCE_DECAY = 0.8
+var HEAT_GROW = 10
+var HEAT_SHRINK = 5
 
 
 var playState = function() {}
@@ -47,6 +52,8 @@ playState.prototype = {
         PHASER.load.image('element-v', 'assets/imgs/element-v.png')
 
         self.score = 0
+        self._lastScore = 0
+        self.heat = 0
         self.combinations = {
             'element1-0+element1-0': { score: 200, elements: ['element1-1', 'element-v', 'element-p'] },
             'element1-1+element1-0': { score: 200, elements: ['element2-1', 'element-y'] },
@@ -56,11 +63,11 @@ playState.prototype = {
             'element3-4+element1-0': { score: 200, elements: ['element2-2', 'element2-2'] },
         }
         self.elementsInfo = {
-            'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50 },
+            'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50, budget: 300 },
             'element1-1': { speed: { min: 8, max: 18 } },
             'element2-1': { speed: { min: 6, max: 16 } },
             'element2-2': { speed: { min: 4, max: 14 } },
-            'element4-3': { speed: { min: 2, max: 12 }, decay: { min: 3000, max: 5000, elements: ['element3-4', 'element-v'] } },
+            'element4-3': { speed: { min: 2, max: 12 }, decay: { min: 3000, max: 5000, score: 200, elements: ['element3-4', 'element-v'] } },
             'element3-4': { speed: { min: 2, max: 12 } },
             'element4-4': { speed: { min: 1, max: 10 }, selectable: false, decay: { min: 3000, max: 5000, score: 200, elements: ['element2-2', 'element2-2'] } },
             'element5-3': { speed: { min: 0, max: 8 }, selectable: false, decay: { min: 2000, max: 3000, score: 200, elements: ['element4-4', 'element-v', 'element-p'] } },
@@ -69,6 +76,73 @@ playState.prototype = {
             'element-y': { speed: { min: 1800, max: 2000 }, hip: true, selectable: false },
             'element-v': { speed: { min: 1450, max: 1500 }, hip: true, selectable: false }
         }
+
+        self.bgGradient = [
+'#250918',
+'#280A19',
+'#2B0B1B',
+'#2F0D1C',
+'#320E1E',
+'#36101F',
+'#391121',
+'#3D1322',
+'#401523',
+'#441725',
+'#471926',
+'#4B1B27',
+'#4E1D28',
+'#511F2A',
+'#55222B',
+'#58242C',
+'#5C262D',
+'#5F292E',
+'#632B30',
+'#662E31',
+'#6A3132',
+'#6D3434',
+'#713837',
+'#743C3A',
+'#78413D',
+'#7B4640',
+'#7E4A43',
+'#824F46',
+'#85544A',
+'#89594D',
+'#8C5E51',
+'#906354',
+'#936858',
+'#976E5C',
+'#9A735F',
+'#9E7863',
+'#A17D67',
+'#A5826B',
+'#A8886F',
+'#AB8D74',
+'#AF9278',
+'#B2987C',
+'#B69D81',
+'#B9A285',
+'#BDA88A',
+'#C0AD8E',
+'#C4B293',
+'#C7B798',
+'#CBBC9D',
+'#CEC1A2',
+'#D2C6A7',
+'#D5CBAC',
+'#D8D0B1',
+'#DCD5B7',
+'#DFDABC',
+'#E3DEC1',
+'#E6E3C7',
+'#EAE7CC',
+'#EDECD2',
+'#F1F0D8',
+'#F4F4DE',
+'#F7F8E3',
+'#FAFBE9',
+'#FDFFF0',
+        ]
     },
 
     create: function() {
@@ -82,9 +156,45 @@ playState.prototype = {
                 for (var i = 0; i < elementInfo.initialCount; i++) {
                     self.addElement(elementType)
                 }
+                elementInfo.budget -= elementInfo.initialCount
             }
         })
-       
+
+        // check we have enough base elements       
+        PHASER.time.events.loop(PHASER.rnd.integerInRange(ELEMENT_REFRESH, ELEMENT_REFRESH), function () {
+            var typesCount = {}
+            self.atoms.forEach(function (sprite) {
+                if (!(sprite.elementType in typesCount)) {
+                    typesCount[sprite.elementType] = 0
+                }
+                typesCount[sprite.elementType] += 1
+            })
+            $.each(self.elementsInfo, function (elementType, elementInfo) {
+                if (elementInfo.initialCount && typesCount[elementType] < elementInfo.initialCount) {
+                    // create more of this element
+                    if (elementInfo.budget > 0) {
+                        self.addElement(elementType)
+                    }
+                }
+            })
+        })
+
+        // score rate (background color)
+        PHASER.time.events.loop(SCORE_RATE, function () {
+            if ((self.score - self._lastScore) > 0) {
+                if (self.heat < self.bgGradient.length * HEAT_GROW) {
+                    self.heat += HEAT_GROW
+                }
+            } else {
+                if (self.heat > 0) {
+                    self.heat -= HEAT_SHRINK
+                }
+            }
+            PHASER.stage.backgroundColor = self.bgGradient[Math.round(self.heat / 10)]
+            //console.log('score progress: ' + self.score + ', ' +  self._lastScore + ', ' + self.heat)
+            self._lastScore = self.score
+        })
+
         // var fullscreen = PHASER.add.button(
         //     PHASER.world.width, PHASER.world.height, 'fullscreenToggleButton', toggleFullscreen, 0, 0, 1, 2
         // )
@@ -133,9 +243,9 @@ playState.prototype = {
         sprite.anchor.set(0.5, 0.5)
         sprite.body.collideWorldBounds = true
         sprite.body.velocity.set(dx, dy)
-        sprite.body.angularVelocity = PHASER.rnd.realInRange(-ROTATTE_SPEED, ROTATTE_SPEED)
+        sprite.body.angularVelocity = PHASER.rnd.realInRange(-ROTATE_SPEED, ROTATE_SPEED)
         sprite.inputEnabled = true
-        var decay = 1.0 // XXX; tweak
+        var decay = BOUNCE_DECAY
         if (elementInfo.hip == true) {
             sprite.inputEnabled = false
             decay = 1.0
@@ -181,12 +291,15 @@ playState.prototype = {
             self.selectElement(this)
         }, sprite)
         self.atoms.add(sprite)
+        return sprite
     },
 
     selectElement: function (sprite) {
         var self = this
+        var retval = false
         // dont allow selection of hip's
         if (self.elementsInfo[sprite.elementType].selectable != false && self.selected.indexOf(sprite) == -1) {
+            retval = true
             sprite.bitmap.setHSL(0.2)
             self.selected.push(sprite)
             if (self.selected.length > 2) {
@@ -213,6 +326,7 @@ playState.prototype = {
                 )
             }
         }
+        return retval
     },
 
     collide: function (a, b) {
@@ -250,8 +364,14 @@ playState.prototype = {
         var fusionResult = self.getFusionResult(a, b)
         self.incrementScore(fusionResult.score)
         var elementTypes = fusionResult.elements
+        var selectedOne = false
         $.each(elementTypes, function (i) {
-            self.addElement(elementTypes[i], x, y, true)
+            var sprite = self.addElement(elementTypes[i], x, y, true)
+            if (selectedOne == false) {
+                if (self.selectElement(sprite)) {
+                    selectedOne = true
+                }
+            }
         })
     },
 
