@@ -6,7 +6,10 @@ LD35 Entry
 * test: https://cdn.rawgit.com/mountainstorm/LD35/gh-pages/index.html
 
 
+## ToDo ##
 
+* Decide if we stick with particles or go with shapes
+* Time bonus - new hydrogen attoms arrive if you do it quickly
 
 
 ## Keywords ##

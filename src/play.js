@@ -34,6 +34,7 @@ playState.prototype = {
         PHASER.load.image('element1-1', 'assets/imgs/element1-1.png')
         PHASER.load.image('element2-1', 'assets/imgs/element2-1.png')
         PHASER.load.image('element2-2', 'assets/imgs/element2-2.png')
+        PHASER.load.image('element3-4', 'assets/imgs/element3-4.png')
         PHASER.load.image('element4-3', 'assets/imgs/element4-3.png')
         PHASER.load.image('element4-4', 'assets/imgs/element4-4.png')
         PHASER.load.image('element5-3', 'assets/imgs/element5-3.png')
@@ -44,22 +45,21 @@ playState.prototype = {
         PHASER.load.image('element-v', 'assets/imgs/element-v.png')
 
         // mapping table
-        self.startElements = {
-            'element1-0': 50,
-            'element2-2': 10
-        }
         self.combinations = {
             'element1-0+element1-0': ['element1-1', 'element-v', 'element-p'],
             'element1-1+element1-0': ['element2-1', 'element-y'],
             'element2-1+element2-2': ['element4-3', 'element-y'],
-            'element4-3+element1-0': ['element5-3', 'element-y']
+            'element4-3+element1-0': ['element5-3', 'element-y'],
+            'element2-1+element2-1': ['element1-0', 'element1-0', 'element2-2'],
+            'element3-4+element1-0': ['element2-2', 'element2-2'],
         }
         self.elementsInfo = {
             'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50 },
-            'element1-1': { speed: { min: 8, max: 18 }, initialCount: 10 },
+            'element1-1': { speed: { min: 8, max: 18 } },
             'element2-1': { speed: { min: 6, max: 16 } },
             'element2-2': { speed: { min: 4, max: 14 } },
-            'element4-3': { speed: { min: 2, max: 12 } },
+            'element4-3': { speed: { min: 2, max: 12 }, decay: { min: 3000, max: 5000, elements: ['element3-4', 'element-v'] } },
+            'element3-4': { speed: { min: 2, max: 12 } },
             'element4-4': { speed: { min: 1, max: 10 }, selectable: false, decay: { min: 3000, max: 5000, elements: ['element2-2', 'element2-2'] } },
             'element5-3': { speed: { min: 0, max: 8 }, selectable: false, decay: { min: 2000, max: 3000, elements: ['element4-4', 'element-v', 'element-p'] } },
 
@@ -75,9 +75,11 @@ playState.prototype = {
         PHASER.physics.startSystem(Phaser.Physics.ARCADE)
 
         self.atoms = PHASER.add.physicsGroup(Phaser.Physics.ARCADE)
-        $.each(self.startElements, function (elementType, elementCount) {
-            for (var i = 0; i < elementCount; i++) {
-                self.addElement(elementType)
+        $.each(self.elementsInfo, function (elementType, elementInfo) {
+            if (elementInfo.initialCount > 0) {
+                for (var i = 0; i < elementInfo.initialCount; i++) {
+                    self.addElement(elementType)
+                }
             }
         })
        
@@ -91,6 +93,13 @@ playState.prototype = {
         var self = this
         PHASER.physics.arcade.collide(self.atoms, undefined, function (a, b) {
             self.collide(a, b)
+        })
+
+        self.atoms.forEach(function (sprite) {
+            if (sprite.trail) {
+                sprite.trail.bitmap.context.fillRect(sprite.x, sprite.y, 2, 2);
+                sprite.trail.bitmap.dirty = true
+            }
         })
     },
 
@@ -117,9 +126,12 @@ playState.prototype = {
         var sprite = PHASER.add.sprite(x, y, element)
         sprite.bitmap = element
         sprite.elementType = elementType
+        sprite.dontDecay = false
         PHASER.physics.arcade.enable(sprite)
+        sprite.anchor.set(0.5, 0.5)
         sprite.body.collideWorldBounds = true
         sprite.body.velocity.set(dx, dy)
+        sprite.body.angularVelocity = PHASER.rnd.realInRange(-600, 600)
         sprite.inputEnabled = true
         var decay = 0.5
         if (elementInfo.hip == true) {
@@ -131,20 +143,30 @@ playState.prototype = {
 
         if (elementInfo.hip) {
             // high energy particle
+            var trail = PHASER.add.bitmapData(PHASER.world.width, PHASER.world.height);
+            trail.context.fillStyle = '#ffffff'
+            var trailSprite = PHASER.add.sprite(0, 0, trail)
+            trailSprite.bitmap = trail
+            sprite.trail = trailSprite
+
+            var t = PHASER.add.tween(sprite.trail).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false)
             var t = PHASER.add.tween(sprite).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false)
             t.onComplete.add(function () {
+                sprite.trail.destroy()
                 self.atoms.remove(sprite)
             })
         } else if (elementInfo.decay) {
             // decay of unstable elements
             PHASER.time.events.add(PHASER.rnd.integerInRange(elementInfo.decay.min, elementInfo.decay.max), function () {
-                // decay object
-                self.atoms.remove(sprite)  
-                var elementTypes = elementInfo.decay.elements
-                $.each(elementTypes, function (i) {
-                    console.log('decaying into', elementTypes[i])
-                    self.addElement(elementTypes[i], x, y)
-                })
+                // decay object - don't if its already been removed my fusion
+                if (sprite.dontDecay == false) {
+                    self.atoms.remove(sprite)
+                    var elementTypes = elementInfo.decay.elements
+                    $.each(elementTypes, function (i) {
+                        console.log('decaying into', elementTypes[i])
+                        self.addElement(elementTypes[i], sprite.world.x, sprite.world.y)
+                    })
+                }
             })
         }
         
@@ -173,7 +195,7 @@ playState.prototype = {
                     var b = self.selected[1]
                     dx = a.world.x - b.world.x
                     dy = a.world.y - b.world.y
-                    console.log(a, b, dx, dy)
+                    //console.log(a, b, dx, dy)
                     // get the distance between the two points
                     var h = Math.sqrt(dx * dx + dy * dy)
                     var f = h / ACCELERATOR_SPEED                 
@@ -207,10 +229,12 @@ playState.prototype = {
         if (aa != undefined && bb != undefined) {
             // they hit each other!
             var cp = a.body.speed + b.body.speed
-            console.log(a, 'hit', b, 'closing speed: ' + cp)
+            //console.log(a, 'hit', b, 'closing speed: ' + cp)
             // 1.5 to account for rounding errors
             if (cp >= ACCELERATOR_SPEED * 1.5 && self.allowedCombination(a, b)) {
                 // remove the sprites and replace with the combined
+                aa.dontDecay = true
+                bb.dontDecay = true
                 self.atoms.remove(aa)
                 self.atoms.remove(bb)
                 self.fuseElements(aa, bb)

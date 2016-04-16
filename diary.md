@@ -10,3 +10,4 @@ Diary
 11:51: Basic mechanics are working - wondering about using dynamic shapes rather than atoms
 12:19: Restructured code and now javascript is doing stupid things
 13:10: Basic gameplay working, need to figure out scoring
+14:19: Decaying and config of most things working ... how do you 'win'
