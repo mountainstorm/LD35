@@ -7,8 +7,8 @@
         <meta name="viewport" content="initial-scale=1 maximum-scale=1 user-scalable=0 minimal-ui" />
 
         <!-- cdn imports -->
-        <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.4.4/phaser.min.js"></script>
+        <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.4.6/phaser.js"></script>
 
         <!-- style imports -->
         <link href='https://fonts.googleapis.com/css?family=Lato:400,100' rel='stylesheet' type='text/css'>
@@ -20,9 +20,13 @@
                 color: #fff;
             }
 
+            h1 {
+                padding-left: 20px;
+            }
+
             body {
                 margin: 0px;
-                padding: 10px;
+                padding: 0px;
                 background-color: #642E2E;
                 color: #fff;
             }
@@ -33,10 +37,9 @@
         <div id="gameCanvas"></div>
 
         <!-- game imports -->
-        <script type="text/javascript" src="src/mjs.js"></script>
-        <script type="text/javascript" src="src/ISOCamera.js"></script>
-        <script type="text/javascript" src="src/Zamboni.js"></script>
-        <script type="text/javascript" src="src/Rink.js"></script>
         <script type="text/javascript" src="src/game.js"></script>
+        <script type="text/javascript" src="src/menu.js"></script>
+        <script type="text/javascript" src="src/play.js"></script>
+        <script type="text/javascript" src="src/credits.js"></script>
     </body>
 </html>
