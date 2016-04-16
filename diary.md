@@ -11,3 +11,5 @@ Diary
 12:19: Restructured code and now javascript is doing stupid things
 13:10: Basic gameplay working, need to figure out scoring
 14:19: Decaying and config of most things working ... how do you 'win'
+17:11: Scoring working and lots of tweaks, giving chain reactions.  It's starting to feel like a game
+18:11: It's a game!

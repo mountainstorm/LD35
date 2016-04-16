@@ -21,7 +21,7 @@
 */
 
 
-var ROTATE_SPEED = 600
+var ROTATE_SPEED = 400
 var ACCELERATOR_SPEED = 800
 var REACTION_SPEED = ACCELERATOR_SPEED
 var ELEMENT_REFRESH = 1000
@@ -52,8 +52,27 @@ playState.prototype = {
         PHASER.load.image('element-v', 'assets/imgs/element-v.png')
 
         self.score = 0
+        self.scoreBonus = 0
         self._lastScore = 0
+        self._displayScore = 0
         self.heat = 0
+
+        self.chainReactions = 0
+        // bonuses are # of chain reactions total so far
+        self.chainReactionBonus = [
+            { target: 4, score: 4000, title: 'Unplanned Reaction +4000' },
+            { target: 10, score: 4000, title: 'Chain Reactor +4000' },
+            { target: 20, score: 4000, title: 'Unstoppable Reactor +4000' }
+        ]
+        // energy bonus are score (excluding bonus) in a SCORE_RATE window
+        // keep these in high to low format as we stop when we find a match
+        self.energyBonus = [
+            { target: 1600, score: '1600', title: 'Super Giant +1600' },
+            { target: 1400, score: '1400', title: 'Blue Giant +1400' },
+            { target: 1200, score: '1200', title: 'Red Giant +1200' },
+            { target: 800, score: '800', title: 'Yellow Dwarf +800' },
+            { target: 600, score: '600', title: 'Atomic +600' },
+        ]
         self.combinations = {
             'element1-0+element1-0': { score: 200, elements: ['element1-1', 'element-v', 'element-p'] },
             'element1-1+element1-0': { score: 200, elements: ['element2-1', 'element-y'] },
@@ -63,7 +82,7 @@ playState.prototype = {
             'element3-4+element1-0': { score: 200, elements: ['element2-2', 'element2-2'] },
         }
         self.elementsInfo = {
-            'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50, budget: 300 },
+            'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50, budget: 50 },
             'element1-1': { speed: { min: 8, max: 18 } },
             'element2-1': { speed: { min: 6, max: 16 } },
             'element2-2': { speed: { min: 4, max: 14 } },
@@ -150,12 +169,14 @@ playState.prototype = {
         self.selected = []
         PHASER.physics.startSystem(Phaser.Physics.ARCADE)
 
+        self.remainingResource = 0
         self.atoms = PHASER.add.physicsGroup(Phaser.Physics.ARCADE)
         $.each(self.elementsInfo, function (elementType, elementInfo) {
             if (elementInfo.initialCount > 0) {
                 for (var i = 0; i < elementInfo.initialCount; i++) {
                     self.addElement(elementType)
                 }
+                self.remainingResource += elementInfo.budget
                 elementInfo.budget -= elementInfo.initialCount
             }
         })
@@ -174,6 +195,8 @@ playState.prototype = {
                     // create more of this element
                     if (elementInfo.budget > 0) {
                         self.addElement(elementType)
+                        self.remainingResource--
+                        self.hudResources.text = 'Resources: ' + self.remainingResource
                     }
                 }
             })
@@ -191,9 +214,31 @@ playState.prototype = {
                 }
             }
             PHASER.stage.backgroundColor = self.bgGradient[Math.round(self.heat / 10)]
-            //console.log('score progress: ' + self.score + ', ' +  self._lastScore + ', ' + self.heat)
+            var ds = self.score - self._lastScore
+            $.each(self.energyBonus, function (i) {
+                var bonus = self.energyBonus[i]
+                if (ds >= bonus.target) {
+                    self.scoreBonus += bonus.score
+                    self.showBonus(bonus.title)
+                    return false
+                }
+            })
             self._lastScore = self.score
         })
+
+        self.hudScore = PHASER.add.text(
+            PHASER.world.centerX, 0,
+            'Score: 0',
+            { font: '40px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+        )
+        self.hudScore.anchor.setTo(0.5, 0)
+
+        self.hudResources = PHASER.add.text(
+            PHASER.world.centerX / 3, 0,
+            'Resources: ' + self.remainingResource,
+            { font: '40px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+        )
+        self.hudResources.anchor.setTo(0.5, 0)        
 
         // var fullscreen = PHASER.add.button(
         //     PHASER.world.width, PHASER.world.height, 'fullscreenToggleButton', toggleFullscreen, 0, 0, 1, 2
@@ -213,6 +258,11 @@ playState.prototype = {
                 sprite.trail.bitmap.dirty = true
             }
         })
+
+        if (self.score + self.scoreBonus > self._displayScore) {
+            self._displayScore += 10
+        }
+        self.hudScore.text = 'Score: ' + self._displayScore
     },
 
     render: function() {
@@ -332,6 +382,15 @@ playState.prototype = {
     collide: function (a, b) {
         var self = this
 
+        if (self.selected.indexOf(a) != -1 && self.selected.indexOf(b) != -1) {
+            self.chainReactions++
+            if (self.chainReactionBonus.length > 0 && self.chainReactions == self.chainReactionBonus[0].target) {
+                var bonus = self.chainReactionBonus.shift()
+                self.scoreBonus += bonus.score // keep score seperate
+                self.showBonus(bonus.title)
+            }
+        }
+
         // they hit each other!
         var cp = a.body.speed + b.body.speed
         //console.log(a, 'hit', b, 'closing speed: ' + cp)
@@ -399,6 +458,20 @@ playState.prototype = {
     incrementScore: function (points) {
         var self = this
         self.score += points
+    },
+
+    showBonus: function (title) {
+        var text = PHASER.add.text(
+            PHASER.world.centerX, PHASER.world.centerY,
+            title,
+            { font: '64px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+        )
+        text.alpha = 0
+        text.anchor.setTo(0.5, 0.5)
+        var t = PHASER.add.tween(text).to({ alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false)
+        t.onComplete.add(function () {
+            PHASER.add.tween(text).to({ alpha: 0 }, 800, Phaser.Easing.Linear.None, true, 1000, 0, false)
+        })
     }
 }
 

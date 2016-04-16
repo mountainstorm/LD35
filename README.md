@@ -9,8 +9,10 @@ LD35 Entry
 ## ToDo ##
 
 * Decide if we stick with particles or go with shapes
-* Time bonus - new hydrogen attoms arrive if you do it quickly
-* Bug when selected item disapears
+* traverse selection through decay
+* Stop overlapping bonus text
+* Click selects whatever is closest
+* Detect when all reactions are done and end game
 
 
 ## Keywords ##
