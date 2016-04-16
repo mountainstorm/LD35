@@ -13,4 +13,6 @@ Diary
 14:19: Decaying and config of most things working ... how do you 'win'
 17:11: Scoring working and lots of tweaks, giving chain reactions.  It's starting to feel like a game
 18:11: It's a game!  but its got a memory leak
-19:18: Im happy with the general gameplay, although I now need to fix the bugs
+19:18: I'm happy with the general gameplay, although I now need to fix the bugs
+20:55: I'm triggering a Webkit crash on iOS; can't figure out how to avoid it.  Pondering making a score screen
+22:48: Been playing with new, smaller, graphics but I seem to prefer my placehodlers eek!  Done for the night

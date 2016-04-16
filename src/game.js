@@ -26,7 +26,7 @@ var PHASER = null
 $(window).load(function () {
     // wait until the window has loaded i.e. EVERY linked resource has been loaded
     // use canvas rendere as WebGL is killed by the uploading of the texture
-    PHASER = new Phaser.Game(1920, 1080, Phaser.AUTO, 'gameCanvas', {
+    PHASER = new Phaser.Game(1920, 1080, Phaser.CANVAS, 'gameCanvas', {
         preload: function() { 
             // maintain aspect ratio
             PHASER.time.advancedTiming = true

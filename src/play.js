@@ -21,9 +21,9 @@
 */
 
 
-var ROTATE_SPEED = 400
+var ROTATE_SPEED = 200 //400
 var ACCELERATOR_SPEED = 800
-var REACTION_SPEED = ACCELERATOR_SPEED
+var REACTION_SPEED = ACCELERATOR_SPEED * 1.5
 var ELEMENT_REFRESH = 1000
 var SCORE_RATE = 2000
 var BOUNCE_DECAY = 0.8
@@ -309,10 +309,24 @@ playState.prototype = {
         )
         self.hudResources.anchor.setTo(0.5, 0)        
 
-        // var fullscreen = PHASER.add.button(
-        //     PHASER.world.width, PHASER.world.height, 'fullscreenToggleButton', toggleFullscreen, 0, 0, 1, 2
-        // )
-        // fullscreen.anchor.setTo(1, 1)
+        PHASER.input.onTap.add(function (pointer) {
+            var nearestDistance = PHASER.world.width + PHASER.world.height
+            var nearestSprite = null
+            self.atoms.forEach(function (sprite) {
+                if (self.selected.indexOf(sprite) == -1) {
+                    var dx = Math.abs(pointer.x - sprite.x)
+                    var dy = Math.abs(pointer.y - sprite.y)
+                    if (dx + dy < nearestDistance) {
+                        nearestDistance = dx + dy
+                        nearestSprite = sprite
+                        console.log('delta', dx, dy)
+                    }
+                }
+            })
+            if (nearestSprite) {
+                self.selectElement(nearestSprite)
+            }
+        })
     },
 
     update: function() {
@@ -323,6 +337,7 @@ playState.prototype = {
 
         self.atoms.forEach(function (sprite) {
             if (sprite.trail) {
+                sprite.rotation = sprite.body.angle
                 sprite.trail.bitmap.context.fillRect(sprite.x, sprite.y, 2, 2);
                 sprite.trail.bitmap.dirty = true
             }
@@ -408,8 +423,8 @@ playState.prototype = {
             trailSprite.bitmap = trail
             sprite.trail = trailSprite
 
-            var t = PHASER.add.tween(sprite.trail).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false)
-            var t = PHASER.add.tween(sprite).to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true, 0, 0, false)
+            var t = PHASER.add.tween(sprite.trail).to({ alpha: 0 }, 1000, Phaser.Easing.Linear.None, true, 0, 0, false)
+            var t = PHASER.add.tween(sprite).to({ alpha: 0 }, 1000, Phaser.Easing.Linear.None, true, 0, 0, false)
             t.onComplete.add(function () {
                 sprite.trail.destroy()
                 self.atoms.remove(sprite)
@@ -430,9 +445,9 @@ playState.prototype = {
             })
         }
         
-        sprite.events.onInputDown.add(function () {
-            self.selectElement(this)
-        }, sprite)
+        // sprite.events.onInputDown.add(function () {
+        //     self.selectElement(this)
+        // }, sprite)
         self.atoms.add(sprite)
         return sprite
     },
@@ -441,9 +456,9 @@ playState.prototype = {
         var self = this
         var retval = false
         // dont allow selection of hip's
-        if (self.elementsInfo[sprite.elementType].selectable != false && self.selected.indexOf(sprite) == -1) {
+        if (self.elementsInfo[sprite.elementType].selectable != false) {
             retval = true
-            sprite.bitmap.setHSL(0.2)
+            sprite.bitmap.setHSL(0.1)
             self.selected.push(sprite)
             if (self.selected.length > 2) {
                 var deselect = self.selected.shift()

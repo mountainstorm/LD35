@@ -11,11 +11,8 @@ LD35 Entry
 * Decide if we stick with particles or go with shapes
 * Traverse selection through decay
 
-* Click selects whatever is closest
-* Detect when all reactions are done and end game
 * Find the memory leak which affects mobile devices
 * Optimize
-* Rotate the hip's to face in the direction of travel
 
 
 ## Keywords ##
