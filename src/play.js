@@ -429,7 +429,7 @@ PlayState.prototype = {
         sprite.body.bounce.set(decay, decay)
 
         if (elementInfo.sound) {
-            PHASER.sound.play(elementInfo.sound, 0.1)
+            PHASER.sound.play(elementInfo.sound, 0.2)
         }
 
         if (reaction == undefined) {
@@ -554,7 +554,7 @@ PlayState.prototype = {
             return true
         })
 
-        PHASER.sound.play('fusion', 0.1)
+        PHASER.sound.play('fusion', 0.2)
 
         var fusionResult = self.getFusionResult(a, b)
         self.incrementScore(fusionResult.score)
