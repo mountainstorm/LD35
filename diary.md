@@ -24,3 +24,6 @@ Diary
 13:32: Got the music planned, having a break before I dive in and record the final version
 15:07: Music sorted and key sound effects done; all that remains is tweaking, testing and the boring bits
 15:53: Got bored trying to add checkboxes for sound etc .. had a break
+18:30: Going to bed for a powernap
+20:00: Awake, and trying to make a checkbox
+21:50: I've had enough - submitting it
