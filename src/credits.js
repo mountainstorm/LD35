@@ -50,7 +50,7 @@ CreditsState.prototype = {
             person: 'R Cooper'
         }, {
             title: 'CRAFT SERVICES',
-            person: 'Mrs J Cooper (wife)'
+            person: 'The Wife'
         }]
         this.ONSCREEN_DURATION = 5000
         this.FADE_DURATION = 1000

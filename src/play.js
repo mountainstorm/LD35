@@ -323,22 +323,57 @@ PlayState.prototype = {
         // self.hudResources.anchor.setTo(0.5, 0)        
 
         PHASER.input.onTap.add(function (pointer) {
-            var nearestDistance = PHASER.world.width + PHASER.world.height
-            var nearestSprite = null
-            self.atoms.forEach(function (sprite) {
-                if (self.selected.indexOf(sprite) == -1) {
-                    var dx = Math.abs(pointer.x - sprite.x)
-                    var dy = Math.abs(pointer.y - sprite.y)
-                    if (dx + dy < nearestDistance) {
-                        nearestDistance = dx + dy
-                        nearestSprite = sprite
+            if (PHASER.paused == false) {
+                var nearestDistance = PHASER.world.width + PHASER.world.height
+                var nearestSprite = null
+                self.atoms.forEach(function (sprite) {
+                    if (self.selected.indexOf(sprite) == -1) {
+                        var dx = Math.abs(pointer.x - sprite.x)
+                        var dy = Math.abs(pointer.y - sprite.y)
+                        if (dx + dy < nearestDistance) {
+                            nearestDistance = dx + dy
+                            nearestSprite = sprite
+                        }
                     }
+                })
+                if (nearestSprite) {
+                    self.selectElement(nearestSprite)
                 }
-            })
-            if (nearestSprite) {
-                self.selectElement(nearestSprite)
             }
         })
+
+        var escKey = PHASER.input.keyboard.addKey(Phaser.Keyboard.ESC)
+        escKey.onDown.add(function () {
+            if (PHASER.paused == true) {
+                PHASER.paused = false
+            } else {
+                PHASER.paused = true
+            }
+        })
+        window.onfocus = function() {
+            PHASER.paused = false
+        }
+        window.onblur = function() {
+            PHASER.paused = true
+        }
+    },
+
+    paused: function () {
+        // show paused dialog
+        var bmp = PHASER.make.bitmapData(PHASER.world.width, PHASER.world.height)
+        var text = PHASER.make.text(
+            PHASER.world.centerX, PHASER.world.centerY,
+            'PAUSED',
+            { font: '40px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+        )
+        text.anchor.set(0.5);
+        bmp.fill(0, 0, 0, 0.3)
+        bmp.draw(text)
+        self.pauseMenu = PHASER.add.image(0, 0, bmp)
+    },
+
+    resumed: function () {
+        self.pauseMenu.destroy()
     },
 
     update: function() {
