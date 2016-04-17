@@ -42,5 +42,39 @@ MenuState.prototype = {
         PHASER.time.events.add(6000, function () {
             PHASER.state.start('HighScore')
         })
+
+
+        // var checkbox = PHASER.add.group()
+        // checkbox.x = PHASER.world.width - 200
+        // checkbox.y = PHASER.world.height - 200
+
+        // var text = PHASER.make.text(
+        //     0, 0,
+        //     ' ' + 'Music',
+        //     { font: '40px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+        // )
+        // text.anchor.setTo(0, 0);
+        // text.x += text.height
+        // checkbox.add(text)
+
+        // checkbox.pivot.x = text.x + text.width
+        // checkbox.pivot.y = text.height
+
+        // var radius = (text.height / 2)
+        // var circle = PHASER.add.graphics()
+        // circle.lineStyle(2, 0xffffff)
+        // circle.drawCircle(
+        //     radius,
+        //     radius,
+        //     radius - (2 * 2)
+        // )
+        // circle.beginFill(0xffffff)
+        // circle.drawCircle(
+        //     radius,
+        //     radius,
+        //     radius - (2 * 10)
+        // )
+        // circle.endFill()
+        // checkbox.add(circle)
     }
 }
