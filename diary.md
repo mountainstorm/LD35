@@ -21,3 +21,6 @@ Diary
 07:22: Awesome F1 race ... more than a tad distracting
 09:31: Highscore table done, graphics done - time to do menu before sorting out sound
 11:25: All the screens done - I don't like them, but there done.  Now sound
+13:32: Got the music planned, having a break before I dive in and record the final version
+15:07: Music sorted and key sound effects done; all that remains is tweaking, testing and the boring bits
+15:53: Got bored trying to add checkboxes for sound etc .. had a break

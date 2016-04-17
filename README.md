@@ -27,7 +27,6 @@ Hold tight, as once you start wielding that power even 'High Energy' will not be
 
 * Traverse selection through decay
 
-* Loading screen
 * Improve Sounds
 * Sound/Music toggles
 * Esc to quit

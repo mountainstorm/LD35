@@ -35,11 +35,10 @@ HighScoreState.prototype = {
         self.highscores = JSON.parse(localStorage.getItem('uk.co.mountainstorm.LD35'))
         if (self.highscores == undefined || self.highscores == null) {
             self.highscores = [
-                { score: 54200, name: 'JAK' },
-                { score: 50100, name: 'AAA' },
-                { score: 48900, name: 'CBD' },
-                { score: 43900, name: 'MTV' },
-
+                { score: 80100, name: 'JAK' },
+                { score: 70800, name: 'AAA' },
+                { score: 65100, name: 'CBD' },
+                { score: 54100, name: 'MTV' },
                 { score: 43900, name: 'MTV' },
                 { score: 40700, name: 'PPS' },
                 { score: 35000, name: 'KJN' },

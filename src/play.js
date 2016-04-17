@@ -173,7 +173,7 @@ PlayState.prototype = {
             'element3-4+element1-0': { score: 200, elements: ['element2-2', 'element2-2'] },
         }
         self.elementsInfo = {
-            'element1-0': { speed: { min: 10, max: 20 }, initialCount: 50, budget: 100 },
+            'element1-0': { speed: { min: 10, max: 20 }, initialCount: 70, budget: 140 },
             'element1-1': { speed: { min: 8, max: 18 } },
             'element2-1': { speed: { min: 6, max: 16 } },
             'element2-2': { speed: { min: 4, max: 14 } },
@@ -206,7 +206,7 @@ PlayState.prototype = {
         })
 
         // check we have enough base elements       
-        PHASER.time.events.loop(PHASER.rnd.integerInRange(ELEMENT_REFRESH, ELEMENT_REFRESH), function () {
+        PHASER.time.events.loop(ELEMENT_REFRESH, function () {
             var typesCount = {}
             self.atoms.forEach(function (sprite) {
                 if (!(sprite.elementType in typesCount)) {
@@ -217,11 +217,13 @@ PlayState.prototype = {
             $.each(self.elementsInfo, function (elementType, elementInfo) {
                 if (elementInfo.initialCount && typesCount[elementType] < elementInfo.initialCount) {
                     // create more of this element
-                    if (elementInfo.budget > 0) {
-                        self.addElement(elementType)
-                        self.remainingResource--
-                        elementInfo.budget--
-                        self.hudResources.text = 'Resources: ' + self.remainingResource
+                    for (var i = 0; i < 2; i++) {
+                        if (elementInfo.budget > 0) {
+                            self.addElement(elementType)
+                            elementInfo.budget--
+                            self.remainingResource--
+                            //self.hudResources.text = 'Resources: ' + self.remainingResource
+                        }
                     }
                 }
             })
@@ -313,12 +315,12 @@ PlayState.prototype = {
         )
         self.hudScore.anchor.setTo(0.5, 0)
 
-        self.hudResources = PHASER.add.text(
-            PHASER.world.centerX / 3, 0,
-            'Resources: ' + self.remainingResource,
-            { font: '40px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
-        )
-        self.hudResources.anchor.setTo(0.5, 0)        
+        // self.hudResources = PHASER.add.text(
+        //     PHASER.world.centerX / 3, 0,
+        //     'Resources: ' + self.remainingResource,
+        //     { font: '40px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+        // )
+        // self.hudResources.anchor.setTo(0.5, 0)        
 
         PHASER.input.onTap.add(function (pointer) {
             var nearestDistance = PHASER.world.width + PHASER.world.height
@@ -457,7 +459,7 @@ PlayState.prototype = {
                     self.atoms.remove(sprite)
                     self.incrementScore(elementInfo.decay.score)
                     var elementTypes = elementInfo.decay.elements
-                    $.each(elementTypes, function (i) {
+                    $.each(elementTypes, function (i) {                     
                         self.addElement(elementTypes[i], sprite.world.x, sprite.world.y)
                     })
                     self.reactions++

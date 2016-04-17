@@ -29,7 +29,6 @@ MenuState.prototype = {
         PHASER.load.image('menuBg', 'assets/imgs/menuBg.png')
 
         PHASER.load.spritesheet('startButton', 'assets/buttons/startButton.png', 200, 70);
-        PHASER.load.spritesheet('fullscreenButton', 'assets/buttons/fullscreenButton.png', 70, 70);
     },
 
     create: function() {
@@ -39,11 +38,6 @@ MenuState.prototype = {
             PHASER.state.start('Play')
         }, 0, 0, 1, 2)
         start.anchor.setTo(0.5, 0.5)
-
-        var fullscreen = PHASER.add.button(
-            PHASER.world.width - 150, PHASER.world.height - 150, 'fullscreenButton', toggleFullscreen, 0, 0, 1, 2
-        )
-        fullscreen.anchor.setTo(1, 1)
 
         PHASER.time.events.add(6000, function () {
             PHASER.state.start('HighScore')

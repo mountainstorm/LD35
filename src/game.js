@@ -35,6 +35,14 @@ $(window).load(function () {
             PHASER.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL
 
             PHASER.load.audio('music', 'assets/sounds/music.mp3')
+
+            var self = this
+            self.progress = PHASER.add.text(
+                PHASER.world.centerX, PHASER.world.centerY,
+                'Progress: 0%',
+                { font: '64px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
+            )
+            self.progress.anchor.setTo(0.5, 0.5)
         },
 
         create: function () {
@@ -43,6 +51,14 @@ $(window).load(function () {
                 PHASER.sound.play('music', 1.0, true)
             }
             PHASER.state.start('Menu')
+        },
+
+        loadUpdate: function () {
+            var self = this
+            self.progress.text = 'Loading: ' + PHASER.load.progress + '%'
+        },
+
+        update: function () {
         }
     })
 
