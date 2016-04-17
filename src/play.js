@@ -57,6 +57,7 @@ PlayState.prototype = {
 
         PHASER.load.audio('fusion', 'assets/sounds/fusion.mp3')
         PHASER.load.audio('hip', 'assets/sounds/hip.mp3')
+        PHASER.load.audio('hip-y', 'assets/sounds/hip.mp3')
 
         self.score = 0
         self.scoreBonus = 0
@@ -182,7 +183,7 @@ PlayState.prototype = {
             'element5-3': { speed: { min: 0, max: 8 }, selectable: false, decay: { min: 2000, max: 3000, score: 200, elements: ['element4-4', 'element-v', 'element-p'] } },
 
             'element-p': { speed: { min: 2000, max: 2200 }, sound: 'hip', hip: true, selectable: false },
-            'element-y': { speed: { min: 1800, max: 2000 }, sound: 'hip', hip: true, selectable: false },
+            'element-y': { speed: { min: 1800, max: 2000 }, sound: 'hip-y', hip: true, selectable: false },
             'element-v': { speed: { min: 1450, max: 1500 }, sound: 'hip', hip: true, selectable: false }
         }
     },
@@ -426,7 +427,7 @@ PlayState.prototype = {
         sprite.body.bounce.set(decay, decay)
 
         if (elementInfo.sound) {
-            PHASER.sound.play(elementInfo.sound)
+            PHASER.sound.play(elementInfo.sound, 0.1)
         }
 
         if (reaction == undefined) {
@@ -551,7 +552,7 @@ PlayState.prototype = {
             return true
         })
 
-        PHASER.sound.play('fusion')
+        PHASER.sound.play('fusion', 0.1)
 
         var fusionResult = self.getFusionResult(a, b)
         self.incrementScore(fusionResult.score)

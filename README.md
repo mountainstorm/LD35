@@ -8,15 +8,14 @@ LD35 Entry
 
 ## ToDo ##
 
-* Decide if we stick with particles or go with shapes
 * Traverse selection through decay
 
-* Sounds
-* Extra reactions
-* name entry on mobile
+* Loading screen
+* Improve Sounds
+* Sound/Music toggles
 
-* tweak selection; move tests and hold
-* reduce the select range
+* Tweak selection; move tests and hold
+* Reduce the select range
 
 * Find the memory leak which affects mobile devices
 * Optimize

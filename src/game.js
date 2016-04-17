@@ -34,7 +34,15 @@ $(window).load(function () {
             PHASER.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
             PHASER.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL
 
-            PHASER.state.start('Play')
+            PHASER.load.audio('music', 'assets/sounds/music.mp3')
+        },
+
+        create: function () {
+            var music = JSON.parse(localStorage.getItem('uk.co.mountainstorm.LD35.music'))
+            if (music == undefined || music == null || music == true) {
+                PHASER.sound.play('music', 1.0, true)
+            }
+            PHASER.state.start('Menu')
         }
     })
 
