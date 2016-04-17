@@ -32,12 +32,15 @@ var ENDGAME = 6000 // long enough for all decays to have completed
 var ENDGAME_WAIT = 6000
 
 
-var playState = function() {}
+var PlayState = function() {}
 
 
-playState.prototype = {
+PlayState.prototype = {
     preload: function() {
         var self = this
+
+        PHASER.score = 0
+
         PHASER.load.image('element1-0', 'assets/imgs/element1-0.png')
         PHASER.load.image('element1-1', 'assets/imgs/element1-1.png')
         PHASER.load.image('element2-1', 'assets/imgs/element2-1.png')
@@ -52,6 +55,9 @@ playState.prototype = {
         PHASER.load.image('element-y', 'assets/imgs/element-y.png')
         PHASER.load.image('element-v', 'assets/imgs/element-v.png')
 
+        PHASER.load.audio('fusion', 'assets/sounds/fusion.mp3')
+        PHASER.load.audio('hip', 'assets/sounds/hip.mp3')
+
         self.score = 0
         self.scoreBonus = 0
         self._lastScore = 0
@@ -63,6 +69,8 @@ playState.prototype = {
 
         self.showingBonus = false
         self.bonusDisplayQueue = []
+
+        self.fusionFlash = 0
 
         self.bgGradient = [
 '#250918',
@@ -173,9 +181,9 @@ playState.prototype = {
             'element4-4': { speed: { min: 1, max: 10 }, selectable: false, decay: { min: 3000, max: 5000, score: 200, elements: ['element2-2', 'element2-2'] } },
             'element5-3': { speed: { min: 0, max: 8 }, selectable: false, decay: { min: 2000, max: 3000, score: 200, elements: ['element4-4', 'element-v', 'element-p'] } },
 
-            'element-p': { speed: { min: 2000, max: 2200 }, hip: true, selectable: false },
-            'element-y': { speed: { min: 1800, max: 2000 }, hip: true, selectable: false },
-            'element-v': { speed: { min: 1450, max: 1500 }, hip: true, selectable: false }
+            'element-p': { speed: { min: 2000, max: 2200 }, sound: 'hip', hip: true, selectable: false },
+            'element-y': { speed: { min: 1800, max: 2000 }, sound: 'hip', hip: true, selectable: false },
+            'element-v': { speed: { min: 1450, max: 1500 }, sound: 'hip', hip: true, selectable: false }
         }
     },
 
@@ -288,7 +296,9 @@ playState.prototype = {
                     var e = PHASER.add.tween(text).to({ alpha: 1 }, 200, Phaser.Easing.Linear.None, true, 0, 0, false)
                     e.onComplete.add(function () {
                         PHASER.time.events.add(ENDGAME_WAIT, function () {
-                            PHASER.state.start('Credits')
+                            // store the final score
+                            PHASER.score = self.score + self.scoreBonus
+                            PHASER.state.start('HighScore')
                         })
                     })
                 }
@@ -319,7 +329,6 @@ playState.prototype = {
                     if (dx + dy < nearestDistance) {
                         nearestDistance = dx + dy
                         nearestSprite = sprite
-                        console.log('delta', dx, dy)
                     }
                 }
             })
@@ -332,7 +341,9 @@ playState.prototype = {
     update: function() {
         var self = this
         PHASER.physics.arcade.collide(self.atoms, undefined, function (a, b) {
-            self.collide(a, b)
+            if (self.collide(a, b)) {
+                self.fusionFlash = 3
+            }
         })
 
         self.atoms.forEach(function (sprite) {
@@ -365,11 +376,15 @@ playState.prototype = {
         }
         var g = 6.0 / (self.bgGradient.length - 1.0)
         var h = Math.round(self._currentHeat / g)
-        if (h >= self.bgGradient.length) {
+        if (self.fusionFlash > 0 || h >= self.bgGradient.length) {
             h = self.bgGradient.length - 1
         }
         PHASER.stage.backgroundColor = self.bgGradient[h]
         self.displayBonus()
+
+        if (self.fusionFlash > 0) {
+            self.fusionFlash--
+        }        
     },
 
     render: function() {
@@ -409,6 +424,10 @@ playState.prototype = {
             sprite.body.collideWorldBounds = false
         }
         sprite.body.bounce.set(decay, decay)
+
+        if (elementInfo.sound) {
+            PHASER.sound.play(elementInfo.sound)
+        }
 
         if (reaction == undefined) {
             sprite.alpha = 0
@@ -458,11 +477,11 @@ playState.prototype = {
         // dont allow selection of hip's
         if (self.elementsInfo[sprite.elementType].selectable != false) {
             retval = true
-            sprite.bitmap.setHSL(0.1)
+            sprite.bitmap.setHSL(undefined, 0.8, undefined)
             self.selected.push(sprite)
             if (self.selected.length > 2) {
                 var deselect = self.selected.shift()
-                deselect.bitmap.setHSL(0.0)
+                deselect.bitmap.load(deselect.elementType)
             }
             if (self.selected.length == 2) {
                 // change velocity so its towards each other
@@ -489,6 +508,7 @@ playState.prototype = {
 
     collide: function (a, b) {
         var self = this
+        var retval = false
 
         if (self.selected.indexOf(a) != -1 && self.selected.indexOf(b) != -1) {
             self.chainReactions++
@@ -511,7 +531,9 @@ playState.prototype = {
             self.atoms.remove(b)
             self.fuseElements(a, b)
             self.reactions++
+            retval = true // fusoion occured
         }
+        return retval
     },
 
     fuseElements: function (a, b) {
@@ -523,11 +545,13 @@ playState.prototype = {
         // remove items from selected array
         self.selected = self.selected.filter(function (e) {
             if (e == a || e == b) {
-                e.bitmap.setHSL(0.0) // disable
+                e.bitmap.load(e.elementType)
                 return false
             }
             return true
         })
+
+        PHASER.sound.play('fusion')
 
         var fusionResult = self.getFusionResult(a, b)
         self.incrementScore(fusionResult.score)

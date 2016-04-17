@@ -21,43 +21,43 @@
 */
 
 
-var creditsState = function() {}
+var CreditsState = function() {}
 
 
-creditsState.prototype = {
+CreditsState.prototype = {
     preload: function() {
-        PHASER.load.image('creditsBg', 'assets/imgs/starfield.png')
-        this.credits = [{
-            title: 'Lead Designer',
-            person: 'R Cooper'
-        }, {
-            title: 'Concept Art',
-            person: 'R Cooper'
-        }, {
-            title: 'Lead Programmer',
-            person: 'R Cooper'
-        }, {
-            title: 'Lead Artist',
-            person: 'R Cooper'
-        }, {
-            title: 'Lead Sound Designer',
-            person: 'R Cooper'
-        }, {
-            title: 'Craft Services',
-            person: 'Mrs J Cooper (wife)'
-        }]
-        this.ONSCREEN_DURATION = 5000
-        this.FADE_DURATION = 1000
-        this.SPACING = 1500
+        //PHASER.load.image('creditsBg', 'assets/imgs/starfield.png')
     },
 
     create: function() {
         var self = this
-        var bg = PHASER.add.sprite(0, 0, 'creditsBg')
-        bg.scale.setTo(4)
+        //var bg = PHASER.add.sprite(0, 0, 'creditsBg')
+
+        this.credits = [{
+            title: 'LEAD DESIGNER',
+            person: 'R Cooper'
+        }, {
+            title: 'CONCEPT ART',
+            person: 'R Cooper'
+        }, {
+            title: 'LEAD PROGRAMMER',
+            person: 'R Cooper'
+        }, {
+            title: 'LEAD ARTIST',
+            person: 'R Cooper'
+        }, {
+            title: 'LEAD SOUND DESIGNER',
+            person: 'R Cooper'
+        }, {
+            title: 'CRAFT SERVICES',
+            person: 'Mrs J Cooper (wife)'
+        }]
+        this.ONSCREEN_DURATION = 5000
+        this.FADE_DURATION = 1000
+        this.SPACING = 1000
 
         var delay = 0
-        var text = self.createItem('Credits', delay, true)
+        var text = self.createItem('Credits\n', delay, true)
         $.each(self.credits, function () {
             delay += self.SPACING
             self.createItem(this.title + '\n' + this.person, delay, false)
@@ -65,6 +65,15 @@ creditsState.prototype = {
         PHASER.time.events.add(delay + this.ONSCREEN_DURATION + self.SPACING * 2,  function () {
             PHASER.state.start('Menu')
         })
+
+        PHASER.input.onTap.add(function () {
+            PHASER.state.start('Menu')  
+        })
+        PHASER.input.keyboard.addCallbacks(this, null, null, function (keyCode) {
+            PHASER.state.start('Menu')  
+        })
+
+        PHASER.stage.backgroundColor = '#250918'
     },
 
     createItem: function (title, delay, underline) {

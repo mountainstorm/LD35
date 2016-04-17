@@ -43,9 +43,10 @@ $(window).load(function () {
     // this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas:this.canvasTarget });
 
     // load states
-    PHASER.state.add('Menu', menuState)
-    PHASER.state.add('Play', playState)
-    PHASER.state.add('Credits', creditsState)
+    PHASER.state.add('Menu', MenuState)
+    PHASER.state.add('Play', PlayState)
+    PHASER.state.add('HighScore', HighScoreState)
+    PHASER.state.add('Credits', CreditsState)
 })
 
 

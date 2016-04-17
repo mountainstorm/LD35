@@ -16,3 +16,8 @@ Diary
 19:18: I'm happy with the general gameplay, although I now need to fix the bugs
 20:55: I'm triggering a Webkit crash on iOS; can't figure out how to avoid it.  Pondering making a score screen
 22:48: Been playing with new, smaller, graphics but I seem to prefer my placehodlers eek!  Done for the night
+
+06:53: Awake, down on my computer.  F1 race on TV (double win).  Makea list of all the enhancements I've got plannd
+07:22: Awesome F1 race ... more than a tad distracting
+09:31: Highscore table done, graphics done - time to do menu before sorting out sound
+11:25: All the screens done - I don't like them, but there done.  Now sound

@@ -21,31 +21,32 @@
 */
 
 
-var menuState = function() {}
+var MenuState = function() {}
 
 
-menuState.prototype = {
+MenuState.prototype = {
     preload: function() {
+        PHASER.load.image('menuBg', 'assets/imgs/menuBg.png')
+
         PHASER.load.spritesheet('startButton', 'assets/buttons/startButton.png', 200, 70);
-        PHASER.load.spritesheet('fullscreenToggleButton', 'assets/buttons/fullscreenToggleButton.png', 500, 70);
+        PHASER.load.spritesheet('fullscreenButton', 'assets/buttons/fullscreenButton.png', 70, 70);
     },
 
     create: function() {
-        //start = PHASER.add.text(PHASER.world.centerX, PHASER.world.centerY, 'Start', { font: '64px Lato', fontWeight: '200', fill: "#ffffff", align: "center" })
+        PHASER.add.sprite(0, 0, 'menuBg')
+
         var start = PHASER.add.button(PHASER.world.centerX, PHASER.world.centerY, 'startButton', function() {
             PHASER.state.start('Play')
         }, 0, 0, 1, 2)
         start.anchor.setTo(0.5, 0.5)
 
-        // var fullscreen = PHASER.add.button(
-        //     PHASER.world.width, PHASER.world.height, 'fullscreenToggleButton', toggleFullscreen, 0, 0, 1, 2
-        // )
-        // fullscreen.anchor.setTo(1, 1)
-    },
+        var fullscreen = PHASER.add.button(
+            PHASER.world.width - 150, PHASER.world.height - 150, 'fullscreenButton', toggleFullscreen, 0, 0, 1, 2
+        )
+        fullscreen.anchor.setTo(1, 1)
 
-    update: function() {
-    },
-
-    render: function() {
+        PHASER.time.events.add(6000, function () {
+            PHASER.state.start('HighScore')
+        })
     }
 }
