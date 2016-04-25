@@ -21,60 +21,50 @@
 */
 
 
-var MenuState = function() {}
+Menu = function () {
+}
 
 
-MenuState.prototype = {
-    preload: function() {
-        PHASER.load.image('menuBg', 'assets/imgs/menuBg.png')
-
-        PHASER.load.spritesheet('startButton', 'assets/buttons/startButton.png', 200, 70);
-    },
-
-    create: function() {
-        PHASER.add.sprite(0, 0, 'menuBg')
-
-        var start = PHASER.add.button(PHASER.world.centerX, PHASER.world.centerY, 'startButton', function() {
-            PHASER.state.start('Play')
-        }, 0, 0, 1, 2)
-        start.anchor.setTo(0.5, 0.5)
-
-        PHASER.time.events.add(6000, function () {
-            PHASER.state.start('HighScore')
-        })
+Menu.prototype = Object.create(Phaser.Msx.Attract.prototype)
+Menu.prototype.constructor = Menu
 
 
-        // var checkbox = PHASER.add.group()
-        // checkbox.x = PHASER.world.width - 200
-        // checkbox.y = PHASER.world.height - 200
+Menu.prototype.preload = function () {
+    this.game.load.image('menuBg', 'assets/imgs/menuBg.png')
+}
 
-        // var text = PHASER.make.text(
-        //     0, 0,
-        //     ' ' + 'Music',
-        //     { font: '40px Lato', fontWeight: '300', fill: "#ffffff", align: "center" }
-        // )
-        // text.anchor.setTo(0, 0);
-        // text.x += text.height
-        // checkbox.add(text)
 
-        // checkbox.pivot.x = text.x + text.width
-        // checkbox.pivot.y = text.height
+Menu.prototype.create = function () {
+    Phaser.Msx.Attract.prototype.create.call(this, false, 6000)
+    var bg = this.game.add.sprite(0, 0, 'menuBg')
 
-        // var radius = (text.height / 2)
-        // var circle = PHASER.add.graphics()
-        // circle.lineStyle(2, 0xffffff)
-        // circle.drawCircle(
-        //     radius,
-        //     radius,
-        //     radius - (2 * 2)
-        // )
-        // circle.beginFill(0xffffff)
-        // circle.drawCircle(
-        //     radius,
-        //     radius,
-        //     radius - (2 * 10)
-        // )
-        // circle.endFill()
-        // checkbox.add(circle)
-    }
+    var start = new Phaser.Msx.Button(
+        this.game,
+        this.game.world.centerX,
+        this.game.world.centerY,
+        'Start',
+        function () {
+            this.game.state.start('Play', true, false, false)
+        }
+    )
+    start.anchor.setTo(0.5, 0.5)
+    this.game.add.existing(start)
+
+    var style = Object.assign({}, Phaser.Msx.CONTROL, {
+        align: 'right',
+        transform: undefined
+    })
+    var start = new Phaser.Msx.Button(
+        this.game,
+        this.game.world.width - 100,
+        this.game.world.height - 200,
+        'Options',
+        function () {
+            this.game.state.start('Options', true, false, 'Menu')
+        },
+        this,
+        style
+    )
+    start.anchor.setTo(1.0, 1.0)    
+    this.game.add.existing(start)
 }

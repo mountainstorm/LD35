@@ -4,26 +4,18 @@
         <meta charset="UTF-8" />
         <title>LD35</title>
 
-        <meta name="viewport" content="initial-scale=1 maximum-scale=1 user-scalable=0 minimal-ui" />
+        <meta name="viewport" content="initial-scale=1 maximum-scale=1 user-scalable=0" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
 
-        <!-- cdn imports -->
-        <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.4.6/phaser.min.js"></script>
-
-        <!-- style imports -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
-        <link href='https://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
-        <link href='https://fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
+        <link rel="shortcut icon" href="favicon.png" />
+        <link rel="apple-touch-icon" href="favicon.png" />
 
         <style>
             * {
-                font-family: 'Lato', sans-serif;
-                font-weight: 300;
-                color: #fff;
-            }
-
-            h1 {
-                padding-left: 20px;
+                font-family: Lato, Sans Serif;
+                font-size: 20px;
+                font-weight: 100;
             }
 
             body {
@@ -35,14 +27,15 @@
         </style>
     </head>
     <body>
-        <h1><a href="javascript:toggleFullscreen()"><i class="fa fa-arrows-alt" aria-hidden="true"></i></a> LD35 Entry - Mountainstorm; <a href="https://github.com/mountainstorm/LD35">src</a></h1>
-        <div id="gameCanvas"></div>
+        <div id="msx"></div>
 
         <!-- game imports -->
+        <script type="text/javascript" src="phaser.js"></script>
+        <script type="text/javascript" src="phaser.msx.js"></script>
+
         <script type="text/javascript" src="src/game.js"></script>
-        <script type="text/javascript" src="src/menu.js"></script>
-        <script type="text/javascript" src="src/play.js"></script>
-        <script type="text/javascript" src="src/highscore.js"></script>
-        <script type="text/javascript" src="src/credits.js"></script>
+
+        <script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
+
     </body>
 </html>

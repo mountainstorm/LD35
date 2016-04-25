@@ -1,0 +1,17 @@
+{
+      "scores": [
+            { "score": 80100, "name": "JAK" },
+            { "score": 70800, "name": "AAA" },
+            { "score": 65100, "name": "CBD" },
+            { "score": 54100, "name": "MTV" },
+            { "score": 43900, "name": "MTV" },
+            { "score": 40700, "name": "PPS" },
+            { "score": 35000, "name": "KJN" },
+            { "score": 33600, "name": "WAE" },
+            { "score": 29700, "name": "TTT" },
+            { "score": 24200, "name": "VHG" }
+      ],
+      "musicVolume": 1.0,
+      "soundVolume": 0.2,
+      "flashing": true
+}
