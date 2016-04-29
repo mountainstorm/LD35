@@ -544,9 +544,13 @@ Phaser.Msx.Play = function (quitTo) {
     // isn't a good call as you can't stop physics etc.  The up
     // shot is that theres no options menu for you!
 
-    // XXX:
-    // change button/slider to use game.input http://phaser.io/examples/v2/misc/pause-menu
-    // instead of events - they will then work on pause screen
+    var onfocus = window.onfocus
+    window.onfocus = function (ev) {
+        if (play.game) {
+            play.game.paused = true // ensure whatever happens we're paused when we return
+        }
+        onfocus.call(this, ev)
+    }
 }
 
 
@@ -845,7 +849,12 @@ Phaser.Msx.HighScores.prototype.init = function (score) {
 }
 
 
-Phaser.Msx.HighScores.prototype.create = function() {
+Phaser.Msx.HighScores.prototype.create = function(clickToPass, durationToPass) {
+    if (clickToPass == undefined) {
+        clickToPass = true
+    }
+    durationToPass = durationToPass || 6000
+
     // draw the top 10 scores
     var update = null
     this.highscores = this.loadScores()
@@ -862,7 +871,7 @@ Phaser.Msx.HighScores.prototype.create = function() {
     }
 
     // call parent
-    Phaser.Msx.Attract.prototype.create.call(this, true, 6000)
+    Phaser.Msx.Attract.prototype.create.call(this, clickToPass, durationToPass)
 
     // render it
     this.highscoresUI = this.game.add.group()

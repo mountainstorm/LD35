@@ -1,0 +1,112 @@
+{
+    "bgGradient": [
+        "#250918",
+        "#280A19",
+        "#2B0B1B",
+        "#2F0D1C",
+        "#320E1E",
+        "#36101F",
+        "#391121",
+        "#3D1322",
+        "#401523",
+        "#441725",
+        "#471926",
+        "#4B1B27",
+        "#4E1D28",
+        "#511F2A",
+        "#55222B",
+        "#58242C",
+        "#5C262D",
+        "#5F292E",
+        "#632B30",
+        "#662E31",
+        "#6A3132",
+        "#6D3434",
+        "#713837",
+        "#743C3A",
+        "#78413D",
+        "#7B4640",
+        "#7E4A43",
+        "#824F46",
+        "#85544A",
+        "#89594D",
+        "#8C5E51",
+        "#906354",
+        "#936858",
+        "#976E5C",
+        "#9A735F",
+        "#9E7863",
+        "#A17D67",
+        "#A5826B",
+        "#A8886F",
+        "#AB8D74",
+        "#AF9278",
+        "#B2987C",
+        "#B69D81",
+        "#B9A285",
+        "#BDA88A",
+        "#C0AD8E",
+        "#C4B293",
+        "#C7B798",
+        "#CBBC9D",
+        "#CEC1A2",
+        "#D2C6A7",
+        "#D5CBAC",
+        "#D8D0B1",
+        "#DCD5B7",
+        "#DFDABC",
+        "#E3DEC1",
+        "#E6E3C7",
+        "#EAE7CC",
+        "#EDECD2",
+        "#F1F0D8",
+        "#F4F4DE",
+        "#F7F8E3",
+        "#FAFBE9",
+        "#FDFFF0"
+    ],
+    "chainReactionBonus": [
+        { "target": 4, "score": 4000, "title": "Unplanned Reaction +4000" },
+        { "target": 10, "score": 4000, "title": "Chain Reactor +4000" },
+        { "target": 20, "score": 4000, "title": "Unstoppable Reactor +4000" }
+    ],
+    "energyBonus": [
+        { "target": 3200, "score": 1600, "title": "Super Giant +1600" },
+        { "target": 2800, "score": 1400, "title": "Blue Giant +1400" },
+        { "target": 2400, "score": 1200, "title": "Red Giant +1200" },
+        { "target": 1600, "score": 800, "title": "Yellow Dwarf +800" },
+        { "target": 1200, "score": 600, "title": "Atomic +600"}
+    ],
+    "reactionBonus": [
+        { "target": 6, "score": 1600, "title": "Roasting +1600" },
+        { "target": 4, "score": 1400, "title": "Toasty +1400" },
+        { "target": 3, "score": 1200, "title": "Warm +1200" }
+    ],
+    "combinations": {
+        "element1-0+element1-0": { "score": 200, "elements": ["element1-1", "element-v", "element-p"] },
+        "element1-1+element1-0": { "score": 200, "elements": ["element2-1", "element-y"] },
+        "element2-1+element2-2": { "score": 200, "elements": ["element4-3", "element-y"] },
+        "element4-3+element1-0": { "score": 1000, "elements": ["element5-3", "element-y"] },
+        "element2-1+element2-1": { "score": 200, "elements": ["element1-0", "element1-0", "element2-2"] },
+        "element3-4+element1-0": { "score": 200, "elements": ["element2-2", "element2-2"] }
+    },
+    "elementsInfo": {
+        "element1-0": { "speed": { "min": 10, "max": 20 }, "initialCount": 70, "budget": 140 },
+        "element1-1": { "speed": { "min": 8, "max": 18 } },
+        "element2-1": { "speed": { "min": 6, "max": 16 } },
+        "element2-2": { "speed": { "min": 4, "max": 14 } },
+        "element4-3": { "speed": { "min": 2, "max": 12 }, "decay": {
+            "min": 3000, "max": 5000, "score": 200, "elements": ["element3-4", "element-v"] }
+        },
+        "element3-4": { "speed": { "min": 2, "max": 12 } },
+        "element4-4": { "speed": { "min": 1, "max": 10 }, "selectable": false, "decay": {
+            "min": 3000, "max": 5000, "score": 200, "elements": ["element2-2", "element2-2"] }
+        },
+        "element5-3": { "speed": { "min": 0, "max": 8 }, "selectable": false, "decay": {
+            "min": 2000, "max": 3000, "score": 200, "elements": ["element4-4", "element-v", "element-p"] }
+        },
+        "element-p": { "speed": { "min": 2000, "max": 2200 }, "sound": "hip", "hip": true, "selectable": false },
+        "element-y": { "speed": { "min": 1800, "max": 2000 }, "sound": "hip-y", "hip": true, "selectable": false },
+        "element-v": { "speed": { "min": 1450, "max": 1500 }, "sound": "hip", "hip": true, "selectable": false }
+    }    
+}

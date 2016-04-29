@@ -41,7 +41,12 @@ Phaser.Msx.HighScores.prototype.init = function (score) {
 }
 
 
-Phaser.Msx.HighScores.prototype.create = function() {
+Phaser.Msx.HighScores.prototype.create = function(clickToPass, durationToPass) {
+    if (clickToPass == undefined) {
+        clickToPass = true
+    }
+    durationToPass = durationToPass || 6000
+
     // draw the top 10 scores
     var update = null
     this.highscores = this.loadScores()
@@ -58,7 +63,7 @@ Phaser.Msx.HighScores.prototype.create = function() {
     }
 
     // call parent
-    Phaser.Msx.Attract.prototype.create.call(this, true, 6000)
+    Phaser.Msx.Attract.prototype.create.call(this, clickToPass, durationToPass)
 
     // render it
     this.highscoresUI = this.game.add.group()
